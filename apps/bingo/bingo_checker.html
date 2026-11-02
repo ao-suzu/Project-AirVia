@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ビンゴチェッカー</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f1f5f9;
+            margin: 0;
+            padding: 12px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 18px 14px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        }
+
+        .header-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .back-btn {
+            background: #f1f5f9;
+            color: #334155;
+            border: 1px solid #cbd5e1;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 600;
+        }
+        
+        .title {
+            text-align: center;
+            font-size: 20px;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 14px;
+        }
+        
+        .section {
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 14px 10px;
+            margin: 12px 0;
+        }
+        
+        .section-title {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #475569;
+            text-align: center;
+        }
+        
+        .input-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 6px;
+            width: 100%;
+        }
+        
+        .number-input {
+            flex: 1;
+            min-width: 0;
+            max-width: 58px;
+            height: 52px;
+            font-size: 20px;
+            font-weight: 800;
+            text-align: center;
+            border: 2px solid #cbd5e1;
+            border-radius: 10px;
+            outline: none;
+            background: #ffffff;
+            color: #0f172a;
+            -moz-appearance: textfield;
+            padding: 0;
+        }
+
+        .number-input::-webkit-outer-spin-button,
+        .number-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        
+        .number-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+            background: #ffffff;
+        }
+        
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 18px 0 12px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 12px 16px;
+            font-size: 15px;
+            font-weight: 700;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-check {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-check:active {
+            background: #059669;
+        }
+        
+        .btn-reset {
+            background: #64748b;
+            color: white;
+        }
+        
+        .btn-reset:active {
+            background: #475569;
+        }
+        
+        .result {
+            text-align: center;
+            font-size: 15px;
+            font-weight: 700;
+            padding: 14px;
+            border-radius: 10px;
+            margin: 10px 0 0;
+        }
+        
+        .result.bingo {
+            background: #fee2e2;
+            color: #ef4444;
+            font-size: 20px;
+            border: 2px solid #f87171;
+            animation: pulse 1s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.98); }
+            100% { transform: scale(1.02); }
+        }
+        
+        .result.waiting {
+            background: #e0f2fe;
+            color: #0369a1;
+            border: 1px solid #bae6fd;
+        }
+        
+        .numbers-display {
+            font-size: 14px;
+            line-height: 1.6;
+            text-align: center;
+            padding: 12px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            word-wrap: break-word;
+            color: #334155;
+            min-height: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-nav">
+            <a href="/" class="back-btn" id="checker-back">← ポータルへ</a>
+            <div id="status" style="font-size: 11px; padding: 3px 8px; background: #dcfce7; color: #15803d; border-radius: 6px; font-weight: bold;">● リアルタイム同期中</div>
+        </div>
+
+        <div class="title">ビンゴチェッカー</div>
+        
+        <div class="section">
+            <div class="section-title">ビンゴライン (5つの数字)</div>
+            <div class="input-row">
+                <input type="number" class="number-input" id="num1" onkeypress="handleEnter(event, 1)">
+                <input type="number" class="number-input" id="num2" onkeypress="handleEnter(event, 2)">
+                <input type="number" class="number-input" id="num3" onkeypress="handleEnter(event, 3)">
+                <input type="number" class="number-input" id="num4" onkeypress="handleEnter(event, 4)">
+                <input type="number" class="number-input" id="num5" onkeypress="handleEnter(event, 5)">
+            </div>
+        </div>
+        
+        <div class="buttons">
+            <button class="btn btn-check" onclick="checkBingo()">チェック</button>
+            <button class="btn btn-reset" onclick="resetInputs()">リセット</button>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">結果</div>
+            <div id="result" class="result waiting">数字を入力してチェックしてください</div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">出た番号</div>
+            <div id="calledNumbers" class="numbers-display">読み込み中...</div>
+        </div>
+    </div>
+
+    <script>
+        let calledNumbers = [];
+        
+        // 起動時に自動で開始
+        window.onload = function() {
+            // ホストPC（localhost）かスマホ（ゲスト）かで戻り先を自動判定
+            const isHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            const backLink = document.getElementById('checker-back');
+            if (isHost) {
+                backLink.href = '/admin';
+                backLink.textContent = '← 管理画面へ';
+            } else {
+                backLink.href = '/';
+                backLink.textContent = '← ポータルへ';
+            }
+
+            document.getElementById('num1').focus();
+            loadFromServer();
+            // 2秒ごとにサーバーから取得
+            setInterval(loadFromServer, 2000);
+        };
+        
+        async function loadFromServer() {
+            try {
+                const response = await fetch('/api/bingo-numbers');
+                const data = await response.json();
+                const newNumbers = data.calledNumbers || [];
+                
+                if (calledNumbers.length !== newNumbers.length) {
+                    calledNumbers = newNumbers;
+                    updateDisplay();
+                    autoCheckBingo();
+                }
+            } catch (error) {}
+        }
+        
+        function updateDisplay() {
+            document.getElementById('calledNumbers').textContent = calledNumbers.join(', ');
+        }
+        
+        function autoCheckBingo() {
+            const numbers = [];
+            for (let i = 1; i <= 5; i++) {
+                const value = document.getElementById(`num${i}`).value;
+                if (!value) return;
+                numbers.push(+value);
+            }
+            checkBingoWithNumbers(numbers);
+        }
+        
+        function handleEnter(event, currentIndex) {
+            if (event.key === 'Enter') {
+                if (currentIndex < 5) {
+                    document.getElementById(`num${currentIndex + 1}`).focus();
+                } else {
+                    checkBingo();
+                }
+            }
+        }
+        
+        function checkBingo() {
+            const numbers = [];
+            for (let i = 1; i <= 5; i++) {
+                const value = document.getElementById(`num${i}`).value;
+                if (!value) {
+                    alert('すべてのボックスに数字を入力してください');
+                    return;
+                }
+                numbers.push(+value);
+            }
+            checkBingoWithNumbers(numbers);
+        }
+        
+        function checkBingoWithNumbers(numbers) {
+            const resultDiv = document.getElementById('result');
+            const calledSet = new Set(calledNumbers);
+            const missing = numbers.filter(num => !calledSet.has(num));
+            
+            if (missing.length === 0) {
+                resultDiv.textContent = '🎉 ビンゴ！ 🎉';
+                resultDiv.className = 'result bingo';
+            } else {
+                resultDiv.textContent = `❌ まだ出ていない番号: ${missing.join(', ')}`;
+                resultDiv.className = 'result waiting';
+            }
+        }
+        
+        function resetInputs() {
+            for (let i = 1; i <= 5; i++) {
+                document.getElementById(`num${i}`).value = '';
+            }
+            document.getElementById('result').textContent = '数字を入力してチェックしてください';
+            document.getElementById('result').className = 'result waiting';
+            document.getElementById('num1').focus();
+        }
+    </script>
+</body>
+</html>

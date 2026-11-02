@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AirVia 管理コンソール</title>
+    <style>
+        :root {
+            /* Theme 1: Cherry (Light) */
+            --bg-page: #FAF5F5;
+            --surface: #FFFFFF;
+            --surface-subtle: #FAF7F7;
+            --text-primary: #2D3139;
+            --text-secondary: #5F6573;
+            --text-muted: #8F95A3;
+            --border: #F0DCDC;
+            --border-hover: #E8C8C8;
+            --accent: #FFB7C5;
+            --accent-hover: #FFA7B7;
+            --accent-text: #4A1D25;
+            --tag-bg: #F2C7C7;
+            --tag-text: #A24857;
+            --status-bg: #D5F3D8;
+            --status-text: #216E39;
+            --card-shadow: rgba(242, 199, 199, 0.2);
+            --danger-bg: #FFF8F8;
+            --danger-border: #F5C6CB;
+            --danger-text: #A93226;
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        /* Theme 2: Simple (Light) */
+        [data-theme="simple"] {
+            --bg-page: #F7F7F2;
+            --surface: #FFFFFF;
+            --surface-subtle: #F9F9F6;
+            --text-primary: #4A4A4A;
+            --text-secondary: #6B7280;
+            --text-muted: #9CA3AF;
+            --border: #CBCBCB;
+            --border-hover: #A8A8A8;
+            --accent: #6D8196;
+            --accent-hover: #5A6D82;
+            --accent-text: #FFFFFF;
+            --tag-bg: #FFFFE3;
+            --tag-text: #4A4A4A;
+            --status-bg: #E2ECE5;
+            --status-text: #2D5034;
+            --card-shadow: rgba(109, 129, 150, 0.12);
+            --danger-bg: #FBF5F5;
+            --danger-border: #E5C3C3;
+            --danger-text: #8C2A2A;
+        }
+
+        /* Theme 3: Midnight (Dark) */
+        [data-theme="midnight"] {
+            --bg-page: #0B0F1A;
+            --surface: #111A2E;
+            --surface-subtle: #1B2A41;
+            --text-primary: #E2E8F0;
+            --text-secondary: #C8D3E0;
+            --text-muted: #8B9BB4;
+            --border: #2F3E56;
+            --border-hover: #3E5373;
+            --accent: #2F3E56;
+            --accent-hover: #3E5373;
+            --accent-text: #FFFFFF;
+            --tag-bg: #1B2A41;
+            --tag-text: #C8D3E0;
+            --status-bg: #122C24;
+            --status-text: #4ADE80;
+            --card-shadow: rgba(0, 0, 0, 0.4);
+            --danger-bg: #221518;
+            --danger-border: #4D2127;
+            --danger-text: #F87171;
+        }
+
+        /* Theme 4: Forest (Dark) */
+        [data-theme="forest"] {
+            --bg-page: #071014;
+            --surface: #0A1F24;
+            --surface-subtle: #0F3A3F;
+            --text-primary: #E6F8F5;
+            --text-secondary: #B8F2E6;
+            --text-muted: #7CA8A2;
+            --border: #1C6B6A;
+            --border-hover: #268C8B;
+            --accent: #1C6B6A;
+            --accent-hover: #268C8B;
+            --accent-text: #FFFFFF;
+            --tag-bg: #0F3A3F;
+            --tag-text: #B8F2E6;
+            --status-bg: #0E332E;
+            --status-text: #34D399;
+            --card-shadow: rgba(0, 0, 0, 0.45);
+            --danger-bg: #201316;
+            --danger-border: #4A1D23;
+            --danger-text: #F87171;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 24px 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 1120px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Top Header */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 14px;
+            border-bottom: 1.5px solid var(--border);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+        }
+
+        .header-title h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.3px;
+        }
+
+        .header-title p {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Clean Dropdown Theme Selector (Single Button) */
+        .theme-select-wrapper {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .theme-dropdown {
+            appearance: none;
+            -webkit-appearance: none;
+            background-color: var(--surface);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            padding: 6px 30px 6px 12px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            outline: none;
+            font-family: inherit;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .theme-dropdown optgroup {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            background-color: var(--surface);
+        }
+
+        .theme-dropdown option {
+            font-size: 13px;
+            font-weight: 500;
+            background-color: var(--surface);
+            color: var(--text-primary);
+        }
+
+        .theme-dropdown:hover {
+            border-color: var(--border-hover);
+        }
+
+        .theme-dropdown:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px var(--card-shadow);
+        }
+
+        .theme-select-icon {
+            position: absolute;
+            right: 10px;
+            pointer-events: none;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+        }
+
+        .theme-select-icon svg {
+            width: 12px;
+            height: 12px;
+            fill: currentColor;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--status-text);
+            background: var(--status-bg);
+            padding: 5px 14px;
+            border-radius: 9999px;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--status-text);
+        }
+
+        /* Main 2-Column Layout */
+        .layout-grid {
+            display: grid;
+            grid-template-columns: 1.3fr 1fr;
+            gap: 20px;
+            align-items: stretch;
+        }
+
+        @media (max-width: 900px) {
+            .layout-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 22px;
+            box-shadow: 0 3px 12px var(--card-shadow);
+        }
+
+        /* Left Column: QR Section */
+        .qr-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .qr-section-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .qr-pair {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .qr-box {
+            background: transparent;
+            border: none;
+            padding: 4px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .qr-step-tag {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--tag-text);
+            background: var(--tag-bg);
+            padding: 3px 10px;
+            border-radius: 6px;
+            margin-bottom: 6px;
+            border: 1px solid rgba(0,0,0,0.04);
+        }
+
+        .qr-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+        }
+
+        .qr-frame {
+            background: #FFFFFF;
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            margin-bottom: 10px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        }
+
+        .qr-frame img {
+            width: 175px;
+            height: 175px;
+            display: block;
+        }
+
+        .qr-meta {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            word-break: break-all;
+        }
+
+        .qr-meta strong {
+            color: var(--text-primary);
+            font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, monospace;
+        }
+
+        /* Independent Portal Preview Banner */
+        .portal-preview-card {
+            margin-top: 14px;
+            background: var(--surface-subtle);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .portal-preview-text {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .portal-preview-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .portal-preview-sub {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .btn-preview {
+            background: var(--surface);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            padding: 6px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-preview:hover {
+            border-color: var(--border-hover);
+        }
+
+        /* Right Column: Controls & Apps */
+        .right-column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .panel-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(128,128,128,0.15);
+            font-size: 13px;
+        }
+
+        .detail-label {
+            color: var(--text-secondary);
+        }
+
+        .detail-val {
+            font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, monospace;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .card-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .menu-wrapper {
+            position: relative;
+        }
+
+        .btn-more {
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: var(--radius-sm);
+            width: 28px;
+            height: 28px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .btn-more:hover {
+            background: var(--surface-subtle);
+            border-color: var(--border);
+            color: var(--text-primary);
+        }
+
+        .menu-popover {
+            display: none;
+            position: absolute;
+            top: calc(100% + 4px);
+            right: 0;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            box-shadow: 0 4px 16px var(--card-shadow);
+            min-width: 140px;
+            padding: 4px;
+            z-index: 50;
+        }
+
+        .menu-popover.active {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            border: none;
+            background: transparent;
+            color: var(--text-primary);
+            font-size: 12px;
+            font-weight: 500;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: left;
+            width: 100%;
+            transition: background 0.12s ease;
+        }
+
+        .menu-item:hover {
+            background: var(--surface-subtle);
+        }
+
+        .menu-item svg {
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+
+        /* Pure Apps List */
+        .app-list-pure {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .app-card-item {
+            background: var(--surface-subtle);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 12px 14px;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .app-card-item:hover {
+            background: var(--surface);
+            border-color: var(--border-hover);
+            box-shadow: 0 2px 6px var(--card-shadow);
+        }
+
+        .app-card-item-title {
+            font-weight: 700;
+            font-size: 13px;
+            color: var(--text-primary);
+        }
+
+        .app-card-item-desc {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .app-card-arrow {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .shutdown-container {
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px solid rgba(128,128,128,0.15);
+        }
+
+        .btn-shutdown {
+            width: 100%;
+            padding: 10px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--danger-border);
+            background: var(--danger-bg);
+            color: var(--danger-text);
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-shutdown:hover {
+            opacity: 0.85;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-left">
+                <div class="header-title">
+                    <h1>AirVia 管理コンソール</h1>
+                    <p>ローカルホットスポット &amp; ポータルハブ</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <!-- Dropdown Theme Selector (Single Control) -->
+                <div class="theme-select-wrapper">
+                    <select id="theme-select" class="theme-dropdown" onchange="onThemeChange(this.value)">
+                        <optgroup label="ライトモード">
+                            <option value="cherry">Cherry</option>
+                            <option value="simple">Simple</option>
+                        </optgroup>
+                        <optgroup label="ダークモード">
+                            <option value="midnight">Midnight</option>
+                            <option value="forest">Forest</option>
+                        </optgroup>
+                    </select>
+                    <div class="theme-select-icon">
+                        <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                    </div>
+                </div>
+
+                <div class="status-badge" id="status-badge">
+                    <span class="status-dot"></span>
+                    <span id="status-text">稼働中</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="layout-grid">
+            <!-- Left: QR Codes & Portal Preview -->
+            <div class="card">
+                <div class="qr-section-header">
+                    <div class="qr-section-title">参加者 接続用QRコード</div>
+                </div>
+
+                <div class="qr-pair">
+                    <!-- Step 1: Wi-Fi -->
+                    <div class="qr-box">
+                        <span class="qr-step-tag">STEP 1</span>
+                        <div class="qr-name">Wi-Fi接続</div>
+                        <div class="qr-frame">
+                            <img id="wifi-qr-img" src="" alt="Wi-Fi QR">
+                        </div>
+                        <div class="qr-meta">
+                            SSID: <strong id="wifi-ssid">-</strong><br>
+                            PASS: <strong id="wifi-pass">-</strong>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Portal Only -->
+                    <div class="qr-box">
+                        <span class="qr-step-tag">STEP 2</span>
+                        <div class="qr-name">ポータルを開く</div>
+                        <div class="qr-frame">
+                            <img id="portal-qr-img" src="" alt="Portal QR">
+                        </div>
+                        <div class="qr-meta">
+                            <strong id="portal-url">http://192.168.137.1:3000</strong><br>
+                            <span style="font-size:11px; opacity:0.85;">※ http:// でアクセス</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Independent Portal Preview -->
+                <div class="portal-preview-card">
+                    <div class="portal-preview-text">
+                        <div class="portal-preview-title">参加者ポータル画面の確認</div>
+                        <div class="portal-preview-sub">スマホ参加者が見るトップページをこのPCでプレビューします</div>
+                    </div>
+                    <a href="/" target="_blank" class="btn-preview">開く ↗</a>
+                </div>
+            </div>
+
+            <!-- Right: Settings & Pure Apps -->
+            <div class="right-column">
+                <!-- Network Info & Settings -->
+                <div class="card">
+                    <div class="card-header-row">
+                        <div class="panel-title" style="margin-bottom:0;">ホットスポット情報</div>
+                        <div class="menu-wrapper">
+                            <button class="btn-more" id="btn-hotspot-more" onclick="toggleHotspotMenu(event)" title="メニュー" aria-label="メニュー">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                    <circle cx="12" cy="5" r="2"></circle>
+                                    <circle cx="12" cy="12" r="2"></circle>
+                                    <circle cx="12" cy="19" r="2"></circle>
+                                </svg>
+                            </button>
+                            <div class="menu-popover" id="hotspot-menu-popover">
+                                <button class="menu-item" onclick="handleMenuEdit()">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 20h9"></path>
+                                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                                    </svg>
+                                    <span>設定変更</span>
+                                </button>
+                                <button class="menu-item" onclick="handleMenuRestart()">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="23 4 23 10 17 10"></polyline>
+                                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                                    </svg>
+                                    <span>再起動</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">IPアドレス</span>
+                        <span class="detail-val" id="host-ip">192.168.137.1</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">ポート</span>
+                        <span class="detail-val">3000</span>
+                    </div>
+                    <div class="detail-row" style="border-bottom:none;">
+                        <span class="detail-label">ネットワーク名 (SSID)</span>
+                        <span class="detail-val" id="info-ssid">-</span>
+                    </div>
+                </div>
+
+                <!-- Pure Apps List -->
+                <div class="card">
+                    <div class="panel-title">搭載アプリケーション</div>
+                    <div class="app-list-pure">
+                        <a href="/apps/photos?from=admin" target="_blank" class="app-card-item">
+                            <div>
+                                <div class="app-card-item-title">写真共有 (AirVia Photos)</div>
+                                <div class="app-card-item-desc">写真アップロード・リアルタイムギャラリー</div>
+                            </div>
+                            <div class="app-card-arrow">開く ↗</div>
+                        </a>
+
+                        <a href="/apps/bingo/index.html" target="_blank" class="app-card-item">
+                            <div>
+                                <div class="app-card-item-title">ビンゴマシン (親機用)</div>
+                                <div class="app-card-item-desc">ドラムロール付き抽選メイン画面</div>
+                            </div>
+                            <div class="app-card-arrow">開く ↗</div>
+                        </a>
+
+                        <a href="/apps/bingo/bingo_checker.html?from=admin" target="_blank" class="app-card-item">
+                            <div>
+                                <div class="app-card-item-title">ビンゴチェッカー</div>
+                                <div class="app-card-item-desc">参加者用カード当たり確認画面</div>
+                            </div>
+                            <div class="app-card-arrow">開く ↗</div>
+                        </a>
+                    </div>
+
+                    <div class="shutdown-container">
+                        <button class="btn-shutdown" onclick="exitServer()">
+                            システムを終了して閉じる
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSsid = '';
+        let currentPass = '';
+
+        function onThemeChange(theme) {
+            if (theme === 'cherry') {
+                document.documentElement.removeAttribute('data-theme');
+            } else {
+                document.documentElement.setAttribute('data-theme', theme);
+            }
+            localStorage.setItem('airvia_theme', theme);
+            const select = document.getElementById('theme-select');
+            if (select) select.value = theme;
+        }
+
+        // Initialize saved theme
+        const savedTheme = localStorage.getItem('airvia_theme') || 'cherry';
+        onThemeChange(savedTheme);
+
+        // Hotspot More Menu Handlers
+        function toggleHotspotMenu(event) {
+            event.stopPropagation();
+            const menu = document.getElementById('hotspot-menu-popover');
+            if (menu) menu.classList.toggle('active');
+        }
+
+        document.addEventListener('click', () => {
+            const menu = document.getElementById('hotspot-menu-popover');
+            if (menu) menu.classList.remove('active');
+        });
+
+        function handleMenuEdit() {
+            const menu = document.getElementById('hotspot-menu-popover');
+            if (menu) menu.classList.remove('active');
+            changeHotspotConfig();
+        }
+
+        function handleMenuRestart() {
+            const menu = document.getElementById('hotspot-menu-popover');
+            if (menu) menu.classList.remove('active');
+            restartHotspot();
+        }
+
+        async function loadAdminInfo(force = false) {
+            try {
+                const url = force ? '/api/admin/info?force=true' : '/api/admin/info';
+                const res = await fetch(url);
+                const data = await res.json();
+                if (data.success) {
+                    currentSsid = data.ssid;
+                    currentPass = data.password;
+
+                    document.getElementById('wifi-ssid').textContent = data.ssid;
+                    document.getElementById('wifi-pass').textContent = data.password;
+                    document.getElementById('info-ssid').textContent = data.ssid;
+                    document.getElementById('host-ip').textContent = data.network.primaryIp;
+                    document.getElementById('portal-url').textContent = data.urls.portal || data.network.portalUrl;
+
+                    document.getElementById('wifi-qr-img').src = data.qrCodes.wifi;
+                    document.getElementById('portal-qr-img').src = data.qrCodes.portal;
+
+                    const statusBadge = document.getElementById('status-badge');
+                    const statusText = document.getElementById('status-text');
+                    if (data.status === 'running') {
+                        statusText.textContent = '稼働中';
+                    } else {
+                        statusText.textContent = '停止中';
+                        statusBadge.style.color = 'var(--danger-text)';
+                        statusBadge.style.background = 'var(--danger-bg)';
+                    }
+                }
+            } catch (err) {
+                console.error('Failed to load admin info:', err);
+            }
+        }
+
+        async function changeHotspotConfig() {
+            const newSsid = prompt('新しいWi-Fiホットスポット名 (SSID):', currentSsid);
+            if (!newSsid) return;
+
+            const newPass = prompt('新しいWi-Fiパスワード (8文字以上):', currentPass);
+            if (!newPass || newPass.length < 8) {
+                alert('パスワードは8文字以上で指定してください');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/admin/hotspot/configure', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ssid: newSsid, password: newPass })
+                });
+                const result = await res.json();
+                if (result.success) {
+                    loadAdminInfo(true);
+                } else {
+                    alert('設定更新に失敗しました: ' + (result.message || ''));
+                }
+            } catch (e) {
+                alert('エラーが発生しました: ' + e.message);
+            }
+        }
+
+        async function restartHotspot() {
+            if (!confirm('ホットスポットを再起動しますか？')) return;
+            await fetch('/api/admin/hotspot/start', { method: 'POST' });
+            setTimeout(() => loadAdminInfo(true), 2000);
+        }
+
+        async function stopHotspot() {
+            if (!confirm('ホットスポットを停止しますか？')) return;
+            await fetch('/api/admin/hotspot/stop', { method: 'POST' });
+            loadAdminInfo(true);
+        }
+
+        async function exitServer() {
+            if (!confirm('サーバーとホットスポットを終了しますか？\n（接続中の全クライアントが切断されます）')) return;
+            try {
+                await fetch('/exit', { method: 'POST' });
+            } catch (e) {}
+
+            document.body.innerHTML = `
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;text-align:center;color:var(--text-primary);background:var(--bg-page);">
+                    <h2 style="font-size:20px;font-weight:700;margin-bottom:8px;">サーバーを終了しました</h2>
+                    <p style="color:var(--text-secondary);font-size:14px;">このウィンドウを閉じてください。</p>
+                </div>
+            `;
+            window.close();
+        }
+
+        loadAdminInfo();
+    </script>
+</body>
+</html>

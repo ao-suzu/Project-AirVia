@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ビンゴアプリ</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+        }
+
+        .left-panel {
+            width: 50%;
+            padding-right: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .right-panel {
+            width: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            /* Center content vertically */
+            margin-left: 10px;
+            position: relative;
+            padding-bottom: 140px;
+            /* Space for history */
+        }
+
+        /* ... background ... */
+        /* ... background removed ... */
+
+        .current-number,
+        .draw-button {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* ... scoreboard ... */
+        .scoreboard {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ... grid styles ... */
+        .bingo-header {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 4px;
+            margin-bottom: 8px;
+        }
+
+        .header-cell {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 8px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 18px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(238, 90, 36, 0.3);
+        }
+
+        .numbers-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 2px;
+            flex: 1;
+            grid-template-rows: repeat(15, 1fr);
+        }
+
+        .number-cell {
+            background: #f8f9fa;
+            padding: 4px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: 600;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 0;
+        }
+
+        .number-cell:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .number-cell.called {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            font-weight: 700;
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(238, 90, 36, 0.4);
+        }
+
+        .current-number {
+            font-size: 220px;
+            font-weight: 800;
+            color: #333;
+            margin-top: 0;
+            /* Removed large margin */
+            margin-bottom: 40px;
+            /* Space between number and button */
+            transform: none;
+            /* Removed transform */
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            animation: pulse 2s infinite;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            width: 320px;
+            height: 320px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            /* Prevent shrinking */
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .draw-button {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            font-size: 24px;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 0;
+            /* Removed large margin */
+            box-shadow: 0 8px 25px rgba(238, 90, 36, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        /* ... button states ... */
+        .draw-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(238, 90, 36, 0.4);
+        }
+
+        .draw-button:active {
+            transform: translateY(-1px);
+        }
+
+        .draw-button:disabled {
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .history {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            /* Anchor to right half */
+            right: 10px;
+            margin-left: 10px;
+            /* Match right panel margin logic */
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 15px;
+            z-index: 10;
+        }
+
+        .history-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 5px;
+            text-align: left;
+        }
+
+        .history-numbers {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 8px;
+        }
+
+        .history-slot {
+            background: #f0f0f0;
+            border: 2px dashed #ccc;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 18px;
+            min-height: 60px;
+            width: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .history-slot.filled {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: 2px solid #ee5a24;
+        }
+
+        .app-title {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            color: white;
+            font-size: 28px;
+            font-weight: 700;
+            z-index: 100;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .reset-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 25px;
+            cursor: pointer;
+            z-index: 100;
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .reset-button:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+        }
+
+        .exit-button {
+            position: absolute;
+            top: 10px;
+            right: 120px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 25px;
+            cursor: pointer;
+            z-index: 100;
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .exit-button:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+        }
+    </style>
+</head>
+
+<body>
+    <a href="/admin" class="back-admin-btn" style="position:fixed;top:10px;left:10px;background:rgba(255,255,255,0.9);color:#333;padding:8px 16px;border-radius:20px;text-decoration:none;font-weight:bold;font-size:14px;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,0.15);">← 管理画面へ</a>
+    <div class="app-title">BINGO App</div>
+    <button class="exit-button" onclick="exitApp()">Exit App</button>
+    <button class="reset-button" onclick="resetJson()">JSON Reset</button>
+    <div class="left-panel">
+        <div class="scoreboard">
+            <div class="bingo-header">
+                <div class="header-cell">B</div>
+                <div class="header-cell">I</div>
+                <div class="header-cell">N</div>
+                <div class="header-cell">G</div>
+                <div class="header-cell">O</div>
+            </div>
+            <div class="numbers-grid" id="numbersGrid"></div>
+        </div>
+    </div>
+
+    <div class="right-panel">
+        <div class="current-number" id="currentNumber">-</div>
+        <button class="draw-button" id="drawButton" onclick="drawNumber()">抽選</button>
+    </div>
+
+    <div class="history">
+        <div class="history-title">直近10回</div>
+        <div class="history-numbers" id="historyNumbers"></div>
+    </div>
+
+    <script>
+        let calledNumbers = new Set();
+        let availableNumbers = [];
+        let numberHistory = [];
+
+        for (let i = 1; i <= 75; i++) {
+            availableNumbers.push(i);
+        }
+
+        function createScoreboard() {
+            const grid = document.getElementById('numbersGrid');
+            for (let i = 1; i <= 75; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'number-cell';
+                cell.textContent = i;
+                cell.id = 'cell-' + i;
+                grid.appendChild(cell);
+            }
+        }
+
+        function createHistorySlots() {
+            const historyContainer = document.getElementById('historyNumbers');
+            for (let i = 0; i < 10; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'history-slot';
+                slot.id = 'history-' + i;
+                historyContainer.appendChild(slot);
+            }
+        }
+
+        async function loadExistingNumbers() {
+            try {
+                const response = await fetch('/api/bingo-numbers');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.calledNumbers && Array.isArray(data.calledNumbers)) {
+                        data.calledNumbers.forEach(num => {
+                            calledNumbers.add(num);
+                            const cell = document.getElementById('cell-' + num);
+                            if (cell) {
+                                cell.classList.add('called');
+                            }
+                            availableNumbers = availableNumbers.filter(n => n !== num);
+                        });
+                        numberHistory = [...data.calledNumbers];
+                        updateHistory();
+
+                        if (data.calledNumbers.length > 0) {
+                            document.getElementById('currentNumber').textContent = data.calledNumbers[data.calledNumbers.length - 1];
+                        }
+                    }
+                }
+            } catch (error) {
+                console.log('No existing numbers file found or error loading:', error);
+            }
+        }
+
+        function updateHistory() {
+            for (let i = 0; i < 10; i++) {
+                const slot = document.getElementById('history-' + i);
+                if (i < numberHistory.length) {
+                    slot.textContent = numberHistory[numberHistory.length - 1 - i];
+                    slot.classList.add('filled');
+                } else {
+                    slot.textContent = '';
+                    slot.classList.remove('filled');
+                }
+            }
+        }
+
+        // 音声インスタンスを事前ロードして抽選時の再生ラグを解消
+        const drumrollAudio = new Audio('drumroll.mp3');
+        drumrollAudio.preload = 'auto';
+
+        function playDrumroll(callback) {
+            try {
+                drumrollAudio.currentTime = 0;
+                drumrollAudio.play().catch(() => { });
+            } catch (e) { }
+            setTimeout(callback, 3000);
+        }
+
+        function drawNumber() {
+            if (availableNumbers.length === 0) {
+                alert('すべての数字が出ました！');
+                return;
+            }
+
+            const button = document.getElementById('drawButton');
+            const numberDisplay = document.getElementById('currentNumber');
+
+            button.disabled = true;
+            button.textContent = '抽選中...';
+
+            const randomIndex = Math.floor(Math.random() * availableNumbers.length);
+            const finalNumber = availableNumbers[randomIndex];
+
+            let spinInterval = setInterval(() => {
+                const randomNum = Math.floor(Math.random() * 75) + 1;
+                numberDisplay.textContent = randomNum;
+            }, 80);
+
+            playDrumroll(() => {
+                clearInterval(spinInterval);
+                numberDisplay.textContent = finalNumber;
+
+                availableNumbers.splice(randomIndex, 1);
+                calledNumbers.add(finalNumber);
+                numberHistory.push(finalNumber);
+
+                document.getElementById('cell-' + finalNumber).classList.add('called');
+                updateHistory();
+
+                fetch('/save-number', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ number: finalNumber })
+                }).catch(() => { });
+
+                button.disabled = false;
+                button.textContent = '抽選';
+
+                if (availableNumbers.length === 0) {
+                    button.disabled = true;
+                }
+            });
+        }
+
+        function resetJson() {
+            if (confirm('ゲームをリセットしますか？')) {
+                fetch('/reset-json', { method: 'POST' })
+                    .then(() => location.reload());
+            }
+        }
+
+        function exitApp() {
+            if (confirm('アプリを終了しますか？（サーバーが停止します）')) {
+                fetch('/exit', { method: 'POST' })
+                    .then(() => {
+                        window.close();
+                        document.body.innerHTML = '<h1 style="color:white;text-align:center;margin-top:20%">サーバーを停止しました。このタブを閉じてください。</h1>';
+                    });
+            }
+        }
+
+        window.onload = function () {
+            createScoreboard();
+            createHistorySlots();
+            loadExistingNumbers();
+        };
+    </script>
+</body>
+
+</html>

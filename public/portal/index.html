@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AirVia</title>
+    <style>
+        :root {
+            --cb-pink-soft: #F2C7C7;
+            --cb-white: #FFFFFF;
+            --cb-green-soft: #D5F3D8;
+            --cb-pink-accent: #FFB7C5;
+
+            --bg-page: #FAF5F5;
+            --surface: #FFFFFF;
+            --surface-variant: #FAF2F2;
+            --text-primary: #2D3139;
+            --text-secondary: #5F6573;
+            --text-tertiary: #8F95A3;
+            --border: #F0DCDC;
+            --border-subtle: #F5E8E8;
+            --primary: #A24857;
+            --icon-bg: #FCEBED;
+            --icon-color: #A24857;
+            --green-text: #216E39;
+            --status-bg: var(--cb-green-soft);
+            --danger: #A93226;
+            --danger-bg: #FDE8E8;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+        }
+
+        /* Theme 2: Simple (Light) */
+        [data-theme="simple"], [data-theme="inkwash"] {
+            --bg-page: #F7F7F2;
+            --surface: #FFFFFF;
+            --surface-variant: #F9F9F6;
+            --text-primary: #4A4A4A;
+            --text-secondary: #6B7280;
+            --text-tertiary: #9CA3AF;
+            --border: #CBCBCB;
+            --border-subtle: #E8E8E8;
+            --primary: #6D8196;
+            --icon-bg: #FFFFE3;
+            --icon-color: #4A4A4A;
+            --green-text: #2D5034;
+            --status-bg: #E2ECE5;
+            --danger: #8C2A2A;
+            --danger-bg: #FBF5F5;
+        }
+
+        /* Theme 3: Midnight (Dark) */
+        [data-theme="midnight"] {
+            --bg-page: #0B0F1A;
+            --surface: #111A2E;
+            --surface-variant: #1B2A41;
+            --text-primary: #E2E8F0;
+            --text-secondary: #C8D3E0;
+            --text-tertiary: #8B9BB4;
+            --border: #2F3E56;
+            --border-subtle: #1B2A41;
+            --primary: #C8D3E0;
+            --icon-bg: #1B2A41;
+            --icon-color: #C8D3E0;
+            --green-text: #4ADE80;
+            --status-bg: #122C24;
+            --danger: #F87171;
+            --danger-bg: #221518;
+        }
+
+        /* Theme 4: Forest (Dark) */
+        [data-theme="forest"] {
+            --bg-page: #071014;
+            --surface: #0A1F24;
+            --surface-variant: #0F3A3F;
+            --text-primary: #E6F8F5;
+            --text-secondary: #B8F2E6;
+            --text-tertiary: #7CA8A2;
+            --border: #1C6B6A;
+            --border-subtle: #0F3A3F;
+            --primary: #B8F2E6;
+            --icon-bg: #0F3A3F;
+            --icon-color: #B8F2E6;
+            --green-text: #34D399;
+            --status-bg: #0E332E;
+            --danger: #F87171;
+            --danger-bg: #201316;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 16px 20px;
+        }
+
+        .header-content {
+            max-width: 520px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand-title {
+            font-size: 19px;
+            font-weight: 700;
+            letter-spacing: -0.2px;
+            color: var(--text-primary);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--green-text);
+            background: var(--cb-green-soft);
+            padding: 3px 9px;
+            border-radius: 9999px;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--green-text);
+        }
+
+        main {
+            flex: 1;
+            max-width: 520px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 24px 16px 40px;
+        }
+
+        .section-header {
+            margin-bottom: 12px;
+            padding: 0 4px;
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+        }
+
+        .app-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .app-item {
+            background: var(--surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            text-decoration: none;
+            color: inherit;
+            transition: background-color 0.15s ease, border-color 0.15s ease;
+        }
+
+        .app-item:active {
+            background: var(--surface-variant);
+        }
+
+        .app-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-md);
+            background: var(--icon-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            color: var(--icon-color);
+        }
+
+        .app-icon svg {
+            width: 22px;
+            height: 22px;
+            fill: currentColor;
+        }
+
+        .app-details {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .app-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 3px;
+        }
+
+        .app-summary {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.35;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .app-chevron {
+            color: var(--text-tertiary);
+            flex-shrink: 0;
+        }
+
+        .app-chevron svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        .shutdown-section {
+            margin-top: 36px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-subtle);
+            text-align: center;
+        }
+
+        .btn-shutdown {
+            background: transparent;
+            color: var(--danger);
+            border: 1px solid rgba(207, 34, 46, 0.25);
+            padding: 10px 18px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.15s ease;
+        }
+
+        .btn-shutdown:active {
+            background: var(--danger-bg);
+            border-color: var(--danger);
+        }
+
+        footer {
+            text-align: center;
+            padding: 16px;
+            font-size: 12px;
+            color: var(--text-tertiary);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1 class="brand-title">AirVia</h1>
+            <div class="status-badge">
+                <span class="status-dot"></span>
+                <span>ローカル接続</span>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="section-header">
+            <h2 class="section-title">利用可能なアプリ</h2>
+        </div>
+
+        <div class="app-list">
+            <!-- Photos -->
+            <a href="/apps/photos" class="app-item">
+                <div class="app-icon">
+                    <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5.04-6.71l-2.75 3.54-1.96-2.36L6.5 17h11l-3.54-4.71z"/></svg>
+                </div>
+                <div class="app-details">
+                    <div class="app-name">写真共有</div>
+                    <div class="app-summary">撮影した写真のアップロードと閲覧</div>
+                </div>
+                <div class="app-chevron">
+                    <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
+                </div>
+            </a>
+
+            <!-- Bingo Checker -->
+            <a href="/apps/bingo/bingo_checker.html" class="app-item">
+                <div class="app-icon">
+                    <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
+                </div>
+                <div class="app-details">
+                    <div class="app-name">ビンゴチェッカー</div>
+                    <div class="app-summary">手元のビンゴカードの番号チェック</div>
+                </div>
+                <div class="app-chevron">
+                    <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
+                </div>
+            </a>
+        </div>
+
+        <div class="shutdown-section">
+            <button class="btn-shutdown" onclick="exitServer()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42C17.99 7.86 19 9.81 19 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.19 1.01-4.14 2.58-5.42L6.17 5.17C4.23 6.82 3 9.26 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z"/></svg>
+                <span>サーバーを終了する</span>
+            </button>
+        </div>
+    </main>
+
+    <footer>
+        Project-AirVia
+    </footer>
+
+    <script>
+        // テーマ自動連動 (cherry, simple, midnight, forest)
+        const savedTheme = localStorage.getItem('airvia_theme');
+        if (savedTheme && savedTheme !== 'cherry') {
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        }
+
+        async function exitServer() {
+            if (!confirm('サーバーとホットスポットを終了しますか？\n（PC側の接続が停止します）')) {
+                return;
+            }
+
+            try {
+                await fetch('/exit', { method: 'POST' });
+            } catch (e) {}
+
+            document.body.innerHTML = `
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;text-align:center;color:var(--text-primary);background:var(--bg-page);">
+                    <h2 style="font-size:18px;font-weight:700;margin-bottom:8px;">サーバーを終了しました</h2>
+                    <p style="color:var(--text-secondary);font-size:14px;">このタブを閉じてください。</p>
+                </div>
+            `;
+            window.close();
+        }
+    </script>
+</body>
+</html>

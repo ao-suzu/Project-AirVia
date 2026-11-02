@@ -1,0 +1,13 @@
+# Dependencies
+node_modules/
+
+# Uploaded User Content (プライバシー保護)
+uploads/photos/*
+!uploads/photos/.gitkeep
+
+# System & Temporary Files
+.DS_Store
+Thumbs.db
+*.log
+.env
+
