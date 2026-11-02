@@ -6,6 +6,7 @@ const HotspotManager = require('./core/hotspot');
 const NetworkManager = require('./core/network');
 
 const photosRouter = require('../apps/photos/router');
+const filesRouter = require('../apps/files/router');
 const bingoModule = require('../apps/bingo/router');
 
 const PORT = 3000;
@@ -25,9 +26,11 @@ app.use('/uploads/photos', express.static(path.join(__dirname, '../uploads/photo
     maxAge: '1d',
     immutable: true
 }));
+app.use('/uploads/files', express.static(path.join(__dirname, '../uploads/files')));
 
 // App Routers
 app.use('/apps/photos', photosRouter);
+app.use('/apps/files', filesRouter);
 app.use('/apps/bingo', bingoModule.router);
 
 // BINGO backward compatibility routes (for existing index.html and checker)
@@ -70,6 +73,7 @@ app.get('/api/admin/info', async (req, res) => {
         },
         urls: {
             portal: networkInfo.portalUrl,
+            files: `http://${networkInfo.primaryIp}:${PORT}/apps/files`,
             photos: `http://${networkInfo.primaryIp}:${PORT}/apps/photos`,
             bingoChecker: `http://${networkInfo.primaryIp}:${PORT}/apps/bingo/bingo_checker.html`
         }
@@ -98,14 +102,14 @@ app.post('/api/admin/hotspot/stop', async (req, res) => {
 // Server shutdown API (stops hotspot and server process)
 app.post('/exit', async (req, res) => {
     res.json({ success: true, message: 'Shutting down server and hotspot...' });
-    console.log('\n🛑 Shutdown requested from UI. Stopping hotspot and server...');
+    console.log('\n[Shutdown] Requested from UI. Stopping hotspot and server...');
     try {
         await hotspotManager.stopHotspot();
     } catch (err) {
         console.error('Error stopping hotspot:', err.message);
     }
     setTimeout(() => {
-        console.log('Server process exited.');
+        console.log('[Server] Process exited.');
         process.exit(0);
     }, 800);
 });
@@ -128,12 +132,12 @@ app.use((err, req, res, next) => {
 // Server Start
 app.listen(PORT, '0.0.0.0', async () => {
     console.log(`\n========================================`);
-    console.log(`🚀 Project-AirVia Server running on port ${PORT}`);
-    console.log(`💻 Admin Dashboard: http://localhost:${PORT}/admin`);
+    console.log(`[Server] Project-AirVia Server running on port ${PORT}`);
+    console.log(`[Admin] Console: http://localhost:${PORT}/admin`);
 
     // ホットスポットとファイアウォールの初期化
     try {
-        console.log(`📡 Initializing Windows Mobile Hotspot (${SSID})...`);
+        console.log(`[Hotspot] Initializing Windows Mobile Hotspot (${SSID})...`);
         await hotspotManager.initAndStart();
     } catch (err) {
         console.error('Hotspot init error:', err.message);
@@ -142,8 +146,8 @@ app.listen(PORT, '0.0.0.0', async () => {
     // IPアドレスとURLの案内
     setTimeout(() => {
         const netInfo = networkManager.getNetworkInfo(true);
-        console.log(`📱 Portal URL: ${netInfo.portalUrl}`);
-        console.log(`📶 Hotspot SSID: ${SSID} | Password: ${PASSWORD}`);
+        console.log(`[Portal] Guest URL: ${netInfo.portalUrl}`);
+        console.log(`[Wi-Fi] SSID: ${SSID} | Password: ${PASSWORD}`);
         console.log(`========================================\n`);
 
         // 管理画面を自動で開く

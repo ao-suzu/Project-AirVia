@@ -101,50 +101,39 @@
             padding: 16px;
         }
 
-        /* Upload Trigger Bar */
-        .upload-bar {
+        /* Upload Area (Files画面と統一) */
+        .upload-card {
             background: var(--surface);
-            border: 1px solid var(--border);
+            border: 1.5px dashed var(--border);
             border-radius: var(--radius-md);
-            padding: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 16px;
+            padding: 24px;
+            text-align: center;
             cursor: pointer;
+            position: relative;
+            margin-bottom: 16px;
             transition: border-color 0.15s ease, background-color 0.15s ease;
         }
 
-        .upload-bar:hover, .upload-bar.dragover {
+        .upload-card:hover, .upload-card.dragover {
             border-color: var(--primary);
-            background: #f6f8fa;
+            background: var(--surface-variant);
         }
 
-        .upload-text {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: var(--text-primary);
-            font-size: 14px;
-            font-weight: 500;
+        .upload-icon {
+            margin-bottom: 8px;
+            color: var(--primary);
         }
 
-        .upload-text svg {
-            width: 20px;
-            height: 20px;
-            fill: var(--text-secondary);
-        }
-
-        .btn-add {
-            background: var(--primary);
-            color: #ffffff;
-            border: none;
-            padding: 7px 14px;
-            border-radius: var(--radius-sm);
-            font-size: 13px;
+        .upload-title {
+            font-size: 15px;
             font-weight: 600;
-            cursor: pointer;
-            pointer-events: none;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .upload-hint {
+            font-size: 12px;
+            color: var(--text-secondary);
         }
 
         #file-input {
@@ -152,33 +141,33 @@
         }
 
         /* Progress Bar */
-        .progress-bar-container {
+        .progress-container {
             display: none;
-            background: var(--border-subtle);
-            border-radius: 9999px;
             height: 4px;
+            background: var(--surface-variant);
+            border-radius: 9999px;
             overflow: hidden;
-            margin-bottom: 16px;
+            margin-top: 12px;
         }
 
-        .progress-bar-fill {
+        .progress-bar {
             height: 100%;
             width: 0%;
             background: var(--primary);
-            transition: width 0.2s ease;
+            transition: width 0.15s ease;
         }
 
-        /* Gallery Grid */
+        /* Gallery Grid (コンパクトなサムネイル並び) */
         .gallery-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-            gap: 8px;
+            grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
+            gap: 6px;
         }
 
         @media (min-width: 600px) {
             .gallery-grid {
-                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-                gap: 12px;
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 8px;
             }
         }
 
@@ -285,8 +274,43 @@
             object-fit: contain;
         }
 
+        .photo-card {
+            position: relative;
+        }
+
+        .btn-card-del {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            background: rgba(0, 0, 0, 0.5);
+            color: #ffffff;
+            border: none;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 2;
+            opacity: 0;
+            transition: opacity 0.15s ease, background-color 0.15s ease;
+        }
+
+        .photo-card:hover .btn-card-del {
+            opacity: 0.85;
+        }
+
+        .btn-card-del:hover {
+            opacity: 1 !important;
+            background: rgba(239, 68, 68, 0.9);
+        }
+
         .lightbox-actions {
             margin-top: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
         .btn-download {
@@ -300,6 +324,26 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
+        }
+
+        .btn-delete-photo {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            padding: 9px 18px;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.15s ease;
+        }
+
+        .btn-delete-photo:hover {
+            background: rgba(239, 68, 68, 0.45);
+            color: #ffffff;
         }
     </style>
 </head>
@@ -315,17 +359,21 @@
     </header>
 
     <main>
-        <div class="upload-bar" id="dropzone" onclick="document.getElementById('file-input').click()">
-            <div class="upload-text">
-                <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-                <span>写真を追加</span>
-            </div>
-            <button class="btn-add">選択</button>
+        <!-- Upload Trigger Area (Files画面と統一) -->
+        <div class="upload-card" id="dropzone" onclick="document.getElementById('file-input').click()">
             <input type="file" id="file-input" multiple accept="image/*,video/*">
-        </div>
-
-        <div class="progress-bar-container" id="progress-container">
-            <div class="progress-bar-fill" id="progress-bar"></div>
+            <div class="upload-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                    <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+            </div>
+            <div class="upload-title">写真・動画をドラッグ＆ドロップ、またはクリックして選択</div>
+            <div class="upload-hint">画像（JPEG, PNG, HEIC等）や動画に対応（1ファイル500MBまで）</div>
+            <div class="progress-container" id="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
         </div>
 
         <div id="gallery-container">
@@ -345,6 +393,13 @@
         <img id="lightbox-img" src="" alt="preview">
         <div class="lightbox-actions">
             <a id="lightbox-dl" class="btn-download" href="" download>保存する</a>
+            <button id="lightbox-del" class="btn-delete-photo" onclick="deleteCurrentPhoto()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+                <span>削除する</span>
+            </button>
         </div>
     </div>
 
@@ -482,7 +537,7 @@
             photos.forEach(photo => {
                 const card = document.createElement('div');
                 card.className = 'photo-card';
-                card.onclick = () => openLightbox(photo.url);
+                card.onclick = () => openLightbox(photo.url, photo.filename);
 
                 const img = document.createElement('img');
                 img.src = photo.url;
@@ -490,18 +545,33 @@
                 img.decoding = 'async';
                 img.alt = photo.filename;
 
+                const delBtn = document.createElement('button');
+                delBtn.className = 'btn-card-del';
+                delBtn.title = '写真を削除';
+                delBtn.innerHTML = `
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                `;
+                delBtn.onclick = (e) => deletePhoto(e, photo.filename);
+
                 const meta = document.createElement('div');
                 meta.className = 'photo-meta';
                 const date = new Date(photo.createdAt);
                 meta.innerHTML = `<span>${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}</span><span>${formatBytes(photo.size)}</span>`;
 
                 card.appendChild(img);
+                card.appendChild(delBtn);
                 card.appendChild(meta);
                 galleryGrid.appendChild(card);
             });
         }
 
-        function openLightbox(url) {
+        let currentPhotoFilename = '';
+
+        function openLightbox(url, filename) {
+            currentPhotoFilename = filename || '';
             lightboxImg.src = url;
             lightboxDl.href = url;
             lightbox.classList.add('active');
@@ -510,6 +580,37 @@
         function closeLightbox() {
             lightbox.classList.remove('active');
             lightboxImg.src = '';
+            currentPhotoFilename = '';
+        }
+
+        async function deletePhoto(event, filename) {
+            if (event) event.stopPropagation();
+            if (!confirm('この写真を削除しますか？')) {
+                return;
+            }
+
+            try {
+                const res = await fetch('/apps/photos/api/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filename })
+                });
+                const result = await res.json();
+                if (result.success) {
+                    renderedPhotoSignatures = ''; // シグネチャリセット
+                    loadPhotos();
+                    closeLightbox();
+                } else {
+                    alert('削除に失敗しました: ' + (result.message || ''));
+                }
+            } catch (err) {
+                alert('通信エラーが発生しました: ' + err.message);
+            }
+        }
+
+        async function deleteCurrentPhoto() {
+            if (!currentPhotoFilename) return;
+            await deletePhoto(null, currentPhotoFilename);
         }
 
         function formatBytes(bytes) {

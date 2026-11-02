@@ -25,7 +25,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({
     storage,
-    limits: { fileSize: 30 * 1024 * 1024 }, // 1ファイル30MBまで
+    limits: { fileSize: 500 * 1024 * 1024 }, // 1ファイル500MBまで
     fileFilter: (req, file, cb) => {
         const allowedTypes = /jpeg|jpg|png|gif|webp|heic|mp4|mov/;
         const ext = path.extname(file.originalname).toLowerCase().replace('.', '');
@@ -90,6 +90,30 @@ router.post('/api/upload', upload.array('photos', 20), (req, res) => {
         size: f.size
     }));
     res.json({ success: true, message: `${uploaded.length} 件アップロードしました`, files: uploaded });
+});
+
+// 写真削除API
+router.post('/api/delete', async (req, res) => {
+    try {
+        const { filename } = req.body;
+        if (!filename) {
+            return res.status(400).json({ success: false, message: 'ファイル名が指定されていません' });
+        }
+
+        const safeFilename = path.basename(filename);
+        const filePath = path.join(uploadDir, safeFilename);
+
+        if (fs.existsSync(filePath)) {
+            await fs.promises.unlink(filePath);
+            cachedPhotoList = null; // キャッシュ破棄
+            return res.json({ success: true, message: '写真を削除しました' });
+        } else {
+            return res.status(404).json({ success: false, message: '写真が見つかりません' });
+        }
+    } catch (err) {
+        console.error('[Photos Delete Error]:', err);
+        res.status(500).json({ success: false, error: err.message });
+    }
 });
 
 // 静的ページ配信

@@ -4,6 +4,8 @@ node_modules/
 # Uploaded User Content (プライバシー保護)
 uploads/photos/*
 !uploads/photos/.gitkeep
+uploads/files/*
+!uploads/files/.gitkeep
 
 # System & Temporary Files
 .DS_Store

@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AirVia Share (Files)</title>
+    <style>
+        :root {
+            /* Theme 1: Cherry (Default Light) */
+            --bg-page: #FAF5F5;
+            --surface: #FFFFFF;
+            --surface-variant: #FAF2F2;
+            --text-primary: #2D3139;
+            --text-secondary: #5F6573;
+            --text-tertiary: #8F95A3;
+            --border: #F0DCDC;
+            --border-subtle: #F5E8E8;
+            --primary: #A24857;
+            --primary-hover: #8C3B49;
+            --accent-bg: #FCEBED;
+            --accent-text: #A24857;
+            --tag-bg: #F2C7C7;
+            --tag-text: #A24857;
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        /* Theme 2: Simple (Light) */
+        [data-theme="simple"], [data-theme="inkwash"] {
+            --bg-page: #F7F7F2;
+            --surface: #FFFFFF;
+            --surface-variant: #F9F9F6;
+            --text-primary: #4A4A4A;
+            --text-secondary: #6B7280;
+            --text-tertiary: #9CA3AF;
+            --border: #CBCBCB;
+            --border-subtle: #E8E8E8;
+            --primary: #6D8196;
+            --primary-hover: #5A6D82;
+            --accent-bg: #FFFFE3;
+            --accent-text: #4A4A4A;
+            --tag-bg: #FFFFE3;
+            --tag-text: #4A4A4A;
+        }
+
+        /* Theme 3: Midnight (Dark) */
+        [data-theme="midnight"] {
+            --bg-page: #0B0F1A;
+            --surface: #111A2E;
+            --surface-variant: #1B2A41;
+            --text-primary: #E2E8F0;
+            --text-secondary: #C8D3E0;
+            --text-tertiary: #8B9BB4;
+            --border: #2F3E56;
+            --border-subtle: #1B2A41;
+            --primary: #8B9BB4;
+            --primary-hover: #C8D3E0;
+            --accent-bg: #1B2A41;
+            --accent-text: #E2E8F0;
+            --tag-bg: #1B2A41;
+            --tag-text: #C8D3E0;
+        }
+
+        /* Theme 4: Forest (Dark) */
+        [data-theme="forest"] {
+            --bg-page: #071014;
+            --surface: #0A1F24;
+            --surface-variant: #0F3A3F;
+            --text-primary: #E6F8F5;
+            --text-secondary: #B8F2E6;
+            --text-tertiary: #7CA8A2;
+            --border: #1C6B6A;
+            --border-subtle: #0F3A3F;
+            --primary: #1C6B6A;
+            --primary-hover: #268C8B;
+            --accent-bg: #0F3A3F;
+            --accent-text: #B8F2E6;
+            --tag-bg: #0F3A3F;
+            --tag-text: #B8F2E6;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background: var(--surface);
+            border-bottom: 1.5px solid var(--border);
+            padding: 14px 20px;
+        }
+
+        .header-content {
+            max-width: 860px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .btn-back {
+            background: var(--surface-variant);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            padding: 6px 12px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-back:hover {
+            border-color: var(--primary);
+        }
+
+        .page-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.3px;
+        }
+
+        .count-badge {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            background: var(--surface-variant);
+            padding: 4px 10px;
+            border-radius: 9999px;
+            border: 1px solid var(--border-subtle);
+        }
+
+        main {
+            flex: 1;
+            max-width: 860px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Upload Area */
+        .upload-card {
+            background: var(--surface);
+            border: 1.5px dashed var(--border);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            text-align: center;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .upload-card:hover, .upload-card.dragover {
+            border-color: var(--primary);
+            background: var(--surface-variant);
+        }
+
+        .upload-icon {
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+
+        .upload-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .upload-hint {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            display: none;
+            height: 4px;
+            background: var(--surface-variant);
+            border-radius: 9999px;
+            overflow: hidden;
+            margin-top: 12px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--primary);
+            transition: width 0.15s ease;
+        }
+
+        /* File List Container */
+        .file-list-card {
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        .list-header {
+            padding: 12px 18px;
+            border-bottom: 1px solid var(--border-subtle);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .file-list {
+            list-style: none;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 18px;
+            border-bottom: 1px solid var(--border-subtle);
+            gap: 12px;
+        }
+
+        .file-item:last-child {
+            border-bottom: none;
+        }
+
+        .file-item:hover {
+            background: var(--surface-variant);
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+            flex: 1;
+        }
+
+        .file-ext-badge {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 4px 6px;
+            border-radius: 4px;
+            background: var(--tag-bg);
+            color: var(--tag-text);
+            min-width: 38px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .file-texts {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .file-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .file-sub {
+            font-size: 11px;
+            color: var(--text-tertiary);
+            margin-top: 2px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-download {
+            background: var(--surface);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            padding: 7px 12px;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            flex-shrink: 0;
+        }
+
+        .btn-download:hover {
+            border-color: var(--primary);
+            background: var(--surface-variant);
+        }
+
+        .file-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .btn-delete-file {
+            background: transparent;
+            color: var(--text-tertiary);
+            border: 1px solid var(--border-subtle);
+            padding: 7px 9px;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.15s ease;
+        }
+
+        .btn-delete-file:hover {
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.4);
+            background: rgba(239, 68, 68, 0.08);
+        }
+
+        .empty-state {
+            padding: 48px 16px;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 16px;
+            font-size: 11px;
+            color: var(--text-tertiary);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="header-left">
+                <a id="files-back" href="/" class="btn-back">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                    <span>戻る</span>
+                </a>
+                <div class="page-title">AirVia Share (Files)</div>
+            </div>
+            <div id="file-count" class="count-badge">0 件</div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Upload Trigger Area -->
+        <div class="upload-card" id="dropzone" onclick="document.getElementById('file-input').click()">
+            <input type="file" id="file-input" multiple>
+            <div class="upload-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+            </div>
+            <div class="upload-title">ファイルをドラッグ＆ドロップ、またはクリックして選択</div>
+            <div class="upload-hint">ドキュメント、ZIP、画像、音楽、動画などあらゆる形式に対応（1ファイル500MBまで）</div>
+            <div class="progress-container" id="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+        </div>
+
+        <!-- Files List -->
+        <div class="file-list-card">
+            <div class="list-header">
+                <span>共有ファイル一覧</span>
+            </div>
+            <div id="empty-state" class="empty-state" style="display:none;">
+                まだ共有されたファイルはありません
+            </div>
+            <ul class="file-list" id="file-list"></ul>
+        </div>
+    </main>
+
+    <footer>
+        Project-AirVia Local Network
+    </footer>
+
+    <script>
+        // テーマ自動連動 (cherry, simple, midnight, forest)
+        const savedTheme = localStorage.getItem('airvia_theme');
+        if (savedTheme && savedTheme !== 'cherry') {
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        }
+
+        // 戻り先制御（ホストPCなら管理画面、ゲストならポータル）
+        const isHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || new URLSearchParams(window.location.search).get('from') === 'admin' || document.referrer.includes('/admin');
+        const backLink = document.getElementById('files-back');
+        if (backLink) {
+            if (isHost) {
+                backLink.href = '/admin';
+                backLink.innerHTML = `
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                    <span>管理画面へ</span>
+                `;
+            } else {
+                backLink.href = '/';
+                backLink.innerHTML = `
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                    <span>ポータルへ</span>
+                `;
+            }
+        }
+
+        const fileInput = document.getElementById('file-input');
+        const dropzone = document.getElementById('dropzone');
+        const fileList = document.getElementById('file-list');
+        const emptyState = document.getElementById('empty-state');
+        const fileCount = document.getElementById('file-count');
+        const progressContainer = document.getElementById('progress-container');
+        const progressBar = document.getElementById('progress-bar');
+
+        ['dragenter', 'dragover'].forEach(name => {
+            dropzone.addEventListener(name, (e) => {
+                e.preventDefault();
+                dropzone.classList.add('dragover');
+            });
+        });
+
+        ['dragleave', 'drop'].forEach(name => {
+            dropzone.addEventListener(name, (e) => {
+                e.preventDefault();
+                dropzone.classList.remove('dragover');
+            });
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles(files);
+        });
+
+        fileInput.addEventListener('change', () => {
+            handleFiles(fileInput.files);
+        });
+
+        function handleFiles(files) {
+            if (!files || files.length === 0) return;
+
+            const formData = new FormData();
+            for (let i = 0; i < files.length; i++) {
+                formData.append('files', files[i]);
+            }
+
+            uploadFiles(formData);
+        }
+
+        function uploadFiles(formData) {
+            progressContainer.style.display = 'block';
+            progressBar.style.width = '30%';
+
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/apps/files/api/upload', true);
+
+            xhr.upload.onprogress = (e) => {
+                if (e.lengthComputable) {
+                    const percent = Math.round((e.loaded / e.total) * 100);
+                    progressBar.style.width = `${percent}%`;
+                }
+            };
+
+            xhr.onload = () => {
+                progressBar.style.width = '100%';
+                setTimeout(() => {
+                    progressContainer.style.display = 'none';
+                    progressBar.style.width = '0%';
+                }, 300);
+
+                if (xhr.status === 200) {
+                    loadFiles();
+                } else {
+                    alert('ファイルのアップロードに失敗しました');
+                }
+                fileInput.value = '';
+            };
+
+            xhr.onerror = () => {
+                progressContainer.style.display = 'none';
+                alert('アップロード中に通信エラーが発生しました');
+            };
+
+            xhr.send(formData);
+        }
+
+        let renderedFileSignatures = '';
+
+        async function loadFiles() {
+            try {
+                const res = await fetch('/apps/files/api/list');
+                const data = await res.json();
+                if (data.success) {
+                    renderFileList(data.files);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function renderFileList(files) {
+            fileCount.textContent = `${files.length} 件`;
+
+            if (files.length === 0) {
+                emptyState.style.display = 'block';
+                fileList.innerHTML = '';
+                renderedFileSignatures = '';
+                return;
+            }
+
+            const currentSignatures = files.map(f => `${f.filename}_${f.size}`).join('|');
+            if (currentSignatures === renderedFileSignatures) {
+                return;
+            }
+            renderedFileSignatures = currentSignatures;
+
+            emptyState.style.display = 'none';
+            fileList.innerHTML = '';
+
+            files.forEach(file => {
+                const li = document.createElement('li');
+                li.className = 'file-item';
+
+                const date = new Date(file.createdAt);
+                const timeStr = `${(date.getMonth() + 1)}/${date.getDate()} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+
+                li.innerHTML = `
+                    <div class="file-info">
+                        <span class="file-ext-badge">${escapeHtml(file.ext)}</span>
+                        <div class="file-texts">
+                            <div class="file-name" title="${escapeHtml(file.displayName)}">${escapeHtml(file.displayName)}</div>
+                            <div class="file-sub">
+                                <span>${formatBytes(file.size)}</span>
+                                <span>${timeStr}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="file-actions">
+                        <a href="${file.downloadUrl}" class="btn-download" download="${escapeHtml(file.displayName)}">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            <span>保存</span>
+                        </a>
+                        <button class="btn-delete-file" onclick="deleteFile(event, '${escapeHtml(file.filename)}', '${escapeHtml(file.displayName)}')" title="削除">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                        </button>
+                    </div>
+                `;
+
+                fileList.appendChild(li);
+            });
+        }
+
+        async function deleteFile(event, filename, displayName) {
+            event.stopPropagation();
+            if (!confirm(`「${displayName}」を削除しますか？`)) {
+                return;
+            }
+
+            try {
+                const res = await fetch('/apps/files/api/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filename })
+                });
+                const result = await res.json();
+                if (result.success) {
+                    renderedFileSignatures = ''; // シグネチャリセット
+                    loadFiles();
+                } else {
+                    alert('削除に失敗しました: ' + (result.message || ''));
+                }
+            } catch (err) {
+                alert('通信エラーが発生しました: ' + err.message);
+            }
+        }
+
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        loadFiles();
+        setInterval(loadFiles, 5000);
+    </script>
+</body>
+</html>
+
