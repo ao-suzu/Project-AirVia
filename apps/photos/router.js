@@ -4,7 +4,8 @@ const path = require('path');
 const fs = require('fs');
 
 const router = express.Router();
-const uploadDir = path.join(__dirname, '../../uploads/photos');
+const ROOT_DIR = process.pkg ? path.dirname(process.execPath) : path.join(__dirname, '../..');
+const uploadDir = path.join(ROOT_DIR, 'uploads/photos');
 
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });

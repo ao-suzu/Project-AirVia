@@ -3,7 +3,8 @@ const path = require('path');
 const fs = require('fs');
 
 const router = express.Router();
-const dataFilePath = path.join(__dirname, 'bingo_numbers.json');
+const ROOT_DIR = process.pkg ? path.dirname(process.execPath) : path.join(__dirname, '../..');
+const dataFilePath = process.pkg ? path.join(ROOT_DIR, 'bingo_numbers.json') : path.join(__dirname, 'bingo_numbers.json');
 
 let bingoData = { calledNumbers: [], history: [] };
 

@@ -7,6 +7,10 @@ uploads/photos/*
 uploads/files/*
 !uploads/files/.gitkeep
 
+# Build artifacts
+dist/
+*.exe
+
 # System & Temporary Files
 .DS_Store
 Thumbs.db

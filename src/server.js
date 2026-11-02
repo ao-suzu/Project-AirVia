@@ -1,6 +1,15 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 const { exec } = require('child_process');
+
+const ROOT_DIR = process.pkg ? path.dirname(process.execPath) : path.join(__dirname, '..');
+
+// Ensure writable directories exist
+const uploadsPhotosDir = path.join(ROOT_DIR, 'uploads/photos');
+const uploadsFilesDir = path.join(ROOT_DIR, 'uploads/files');
+if (!fs.existsSync(uploadsPhotosDir)) fs.mkdirSync(uploadsPhotosDir, { recursive: true });
+if (!fs.existsSync(uploadsFilesDir)) fs.mkdirSync(uploadsFilesDir, { recursive: true });
 
 const HotspotManager = require('./core/hotspot');
 const NetworkManager = require('./core/network');
@@ -9,7 +18,7 @@ const photosRouter = require('../apps/photos/router');
 const filesRouter = require('../apps/files/router');
 const bingoModule = require('../apps/bingo/router');
 
-const PORT = 3000;
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 const SSID = 'AirVia_Local';
 const PASSWORD = 'airviapass123';
 
@@ -22,11 +31,11 @@ const hotspotManager = new HotspotManager({ ssid: SSID, password: PASSWORD, port
 const networkManager = new NetworkManager(PORT);
 
 // Uploads static directory (immutable cache for uploaded media)
-app.use('/uploads/photos', express.static(path.join(__dirname, '../uploads/photos'), {
+app.use('/uploads/photos', express.static(uploadsPhotosDir, {
     maxAge: '1d',
     immutable: true
 }));
-app.use('/uploads/files', express.static(path.join(__dirname, '../uploads/files')));
+app.use('/uploads/files', express.static(uploadsFilesDir));
 
 // App Routers
 app.use('/apps/photos', photosRouter);

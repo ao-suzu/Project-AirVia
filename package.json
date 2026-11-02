@@ -3,8 +3,16 @@
   "version": "1.0.0",
   "description": "Local Wi-Fi Host and Micro-Web Platform powered by Windows Mobile Hotspot",
   "main": "src/server.js",
+  "bin": "src/server.js",
   "scripts": {
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "build:exe": "npx pkg@5.8.1 . --targets node18-win-x64 --output dist/AirVia.exe"
+  },
+  "pkg": {
+    "assets": [
+      "public/**/*",
+      "apps/**/*"
+    ]
   },
   "dependencies": {
     "express": "^4.19.2",
@@ -12,4 +20,3 @@
     "qrcode": "^1.5.3"
   }
 }
-
