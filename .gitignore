@@ -17,3 +17,7 @@ Thumbs.db
 *.log
 .env
 
+# Editor & Workspace settings
+*.code-workspace
+.vscode/
+
