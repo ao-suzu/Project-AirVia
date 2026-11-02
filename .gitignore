@@ -21,3 +21,6 @@ Thumbs.db
 *.code-workspace
 .vscode/
 
+# Documentation / Internal Notes
+docs/
+
